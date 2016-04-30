@@ -1,0 +1,67 @@
+{
+  "name": "redux-undo-immutable",
+  "productName": "Redux Undo Immutable",
+  "version": "0.1.0",
+  "description": "Redux Undo with ImmutableJS",
+  "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "flow check",
+    "clean": "rimraf lib",
+    "build": "webpack src/index.js lib/index.js",
+    "build:min": "cross-env NODE_ENV=production webpack src/index.js lib/index.js",
+    "test": "nyc --all --reporter=lcov --require babel-core/register mocha --recursive src/**/*.spec.js",
+    "test-watch": "npm test -- --watch",
+    "prepublish": "npm run lint && npm run typecheck && npm run test && npm run clean && npm run build:min"
+  },
+  "nyc": {
+    "include": [
+      "**/src/**/*.js"
+    ],
+    "exclude": [
+      "**/*.spec.js",
+      "lib/**"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/idealeric/redux-undo-immutable.git"
+  },
+  "keywords": [
+    "redux",
+    "undo",
+    "redo",
+    "flux",
+    "time travel"
+  ],
+  "bugs": {
+    "url": "https://github.com/idealeric/redux-undo-immutable/issues"
+  },
+  "homepage": "https://github.com/idealeric/redux-undo-immutable",
+  "author": {
+    "name": "Eric Butler",
+    "email": "idealeric@gmail.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.7.7",
+    "babel-eslint": "^6.0.4",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-transform-flow-strip-types": "^6.7.0",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "cross-env": "^1.0.7",
+    "eslint": "^2.9.0",
+    "eslint-plugin-flow-vars": "^0.3.0",
+    "flow-bin": "^0.22.1",
+    "mocha": "^2.4.5",
+    "nyc": "^6.2.1",
+    "rimraf": "^2.5.2",
+    "unexpected": "^10.13.0",
+    "webpack": "^1.13.0"
+  },
+  "dependencies": {
+    "immutable": "^3.8.1",
+    "redux": "^3.5.2"
+  }
+}
