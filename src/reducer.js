@@ -17,7 +17,7 @@ type Reducer<S> = (s?: S, a: Action) => S;
 type HistoricalReducer<S> =
   (his?: IStateHistory<S>, act: JumpAction) => IStateHistory<S>;
 
-const StateHistory = Record({
+export const StateHistory = Record({
   past: List(),
   present: undefined,
   _lastInterestingPresent: undefined,
