@@ -96,6 +96,33 @@ describe('Undoable Higher Order Reducer', () => {
       });
     });
 
+    it('should not add history filtered to the past.', () => {
+      const reduce = undoable(lowerReducer, {
+        historyFilter: action => action.type !== 'INC',
+      });
+      const init = reduce(undefined, {});
+      const res = reduce(init, { type: 'INC' });
+      expect(res.toJS(), 'to satisfy', {
+        past: [0],
+        present: 1,
+        future: [],
+      });
+
+      const res2 = reduce(res, { type: 'INC' });
+      expect(res2.toJS(), 'to satisfy', {
+        past: [0],
+        present: 2,
+        future: [],
+      });
+
+      const res3 = reduce(res2, { type: 'DEC' });
+      expect(res3.toJS(), 'to satisfy', {
+        past: [0],
+        present: 1,
+        future: [],
+      });
+    });
+
   }); // end Reducer describe
 
   describe('ClearHistory', () => {
@@ -243,5 +270,140 @@ describe('Undoable Higher Order Reducer', () => {
     });
 
   }); // end Redo describe
+
+  describe('Jumping', () => {
+
+    it('should noop on zero jump.', () => {
+      const reduce = undoable(lowerReducer);
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+      expect(reduce(init, ActionCreators.jump(0)), 'to be', init);
+    });
+
+    it('should respect bounds.', () => {
+      const reduce = undoable(lowerReducer);
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+
+      const res = reduce(init, ActionCreators.jumpToPast(4));
+      expect(res.toJS(), 'to satisfy', {
+        past: [1, 2, 3],
+        present: 10,
+        future: [11, 12],
+      });
+
+      const res2 = reduce(init, ActionCreators.jumpToFuture(3));
+      expect(res2.toJS(), 'to satisfy', {
+        past: [1, 2, 3],
+        present: 10,
+        future: [11, 12],
+      });
+    });
+
+    it('should jump to the past.', () => {
+      const reduce = undoable(lowerReducer);
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+
+      const res = reduce(init, ActionCreators.jump(-2));
+      expect(res.toJS(), 'to satisfy', {
+        past: [1],
+        present: 2,
+        future: [3, 10, 11, 12],
+      });
+
+      const res2 = reduce(res, { type: 'INC' });
+      expect(res2.toJS(), 'to satisfy', {
+        past: [1, 2],
+        present: 3,
+        future: [],
+      });
+
+      const res3 = reduce(res2, ActionCreators.jump(-1));
+      expect(res3.toJS(), 'to satisfy', {
+        past: [1],
+        present: 2,
+        future: [3],
+      });
+    });
+
+    it('should jump to the future.', () => {
+      const reduce = undoable(lowerReducer);
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+
+      const res = reduce(init, ActionCreators.jump(2));
+      expect(res.toJS(), 'to satisfy', {
+        past: [1, 2, 3, 10, 11],
+        present: 12,
+        future: [],
+      });
+
+      const res2 = reduce(res, { type: 'INC' });
+      expect(res2.toJS(), 'to satisfy', {
+        past: [1, 2, 3, 10, 11, 12],
+        present: 13,
+        future: [],
+      });
+    });
+
+    it('should work with configured type for jump.', () => {
+      const reduce = undoable(lowerReducer, { jumpType: 'jumper' });
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+      const res = reduce(init, { type: 'jumper', index: 1 });
+      expect(res.toJS(), 'to equal', {
+        past: [1, 2, 3, 10],
+        present: 11,
+        future: [12],
+      });
+    });
+
+    it('should work with configured type for jumpToPast.', () => {
+      const reduce = undoable(lowerReducer, { jumpToPastType: 'jumppast' });
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+      const res = reduce(init, { type: 'jumppast', index: 2 });
+      expect(res.toJS(), 'to equal', {
+        past: [1, 2],
+        present: 3,
+        future: [10, 11, 12],
+      });
+    });
+
+    it('should work with configured type for jumpToFuture.', () => {
+      const reduce = undoable(lowerReducer, { jumpToFutureType: 'jumpfuture' });
+      const init = StateHistory({
+        past: List([1, 2, 3]),
+        present: 10,
+        future: List([11, 12]),
+      });
+      const res = reduce(init, { type: 'jumpfuture', index: 0 });
+      expect(res.toJS(), 'to equal', {
+        past: [1, 2, 3, 10],
+        present: 11,
+        future: [12],
+      });
+    });
+
+  }); // end Jump describe
 
 });

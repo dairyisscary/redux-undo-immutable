@@ -64,11 +64,10 @@ function jumpToFuture<S>(history: IStateHistory<S>, i: number): IStateHistory<S>
   if (i === 0) { return redo(history); }
   if (i < 0 || i >= future.size) { return history; }
   return StateHistory({
-    past: past.withMutations(pastMut => {
-      pastMut.concat([present]).concat(future.slice(0, i));
-    }),
+    past: past.push(present).concat(future.slice(0, i)),
     present: future.get(i),
     future: future.slice(i + 1),
+    _lastInterestingPresent: future.get(i),
   });
 }
 
@@ -79,9 +78,8 @@ function jumpToPast<S>(history: IStateHistory<S>, i: number): IStateHistory<S> {
   return StateHistory({
     past: past.slice(0, i),
     present: past.get(i),
-    future: past.withMutations(pastMut => {
-      pastMut.slice(i + 1).concat([present]).concat(future);
-    }),
+    future: past.slice(i + 1).push(present).concat(future),
+    _lastInterestingPresent: past.get(i),
   });
 }
 
@@ -137,10 +135,10 @@ function undoable<S>(reducer: Reducer<S>,
           _lastInterestingPresent: newLastInterestingPresent,
         });
       }
+      const shouldAddPast = _lastInterestingPresent === undefined ||
+                            _lastInterestingPresent === past.last();
       return StateHistory({
-        past: _lastInterestingPresent === undefined ?
-          past :
-          past.push(_lastInterestingPresent),
+        past: shouldAddPast ? past : past.push(_lastInterestingPresent),
         present: newPresent,
         future: List(),
         _lastInterestingPresent: newLastInterestingPresent,
