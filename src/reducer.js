@@ -135,10 +135,17 @@ function undoable<S>(reducer: Reducer<S>,
           _lastInterestingPresent: newLastInterestingPresent,
         });
       }
-      const shouldAddPast = _lastInterestingPresent === undefined ||
-                            _lastInterestingPresent === past.last();
+      const shouldAddPast = _lastInterestingPresent !== undefined &&
+                            _lastInterestingPresent !== past.last();
+      let newPast = past;
+      if (shouldAddPast) {
+        newPast = past.push(_lastInterestingPresent);
+        if (config.limit > 0 && config.limit < newPast.size) {
+          newPast = newPast.slice(1);
+        }
+      }
       return StateHistory({
-        past: shouldAddPast ? past : past.push(_lastInterestingPresent),
+        past: newPast,
         present: newPresent,
         future: List(),
         _lastInterestingPresent: newLastInterestingPresent,

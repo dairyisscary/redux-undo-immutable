@@ -13,6 +13,7 @@ export type Configuration<S> = {
   clearHistoryType: string,
   actionFilter: (a: Action, pres: S, past: List) => boolean,
   historyFilter: (a: Action, pres: S) => boolean,
+  limit: number,
 };
 
 export function make<S>(rawConfig?: Object): Configuration<S> {
@@ -26,5 +27,6 @@ export function make<S>(rawConfig?: Object): Configuration<S> {
     clearHistoryType: rawConfig.clearHistoryType || ActionTypes.CLEAR_HISTORY,
     actionFilter: rawConfig.actionFilter || (() => true),
     historyFilter: rawConfig.historyFilter || (() => true),
+    limit: rawConfig.limit || 0,
   };
 }

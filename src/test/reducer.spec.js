@@ -22,6 +22,19 @@ describe('Undoable Higher Order Reducer', () => {
 
   describe('Reducer', () => {
 
+    it('should allow a limit on the past number of states.', () => {
+      const reduce = undoable(lowerReducer, { limit: 2 });
+      const res = reduce(undefined, {});
+      const res2 = reduce(res, { type: 'INC' });
+      expect(res2.past.size, 'to be', 1);
+      const res3 = reduce(res2, { type: 'INC' });
+      expect(res3.past.size, 'to be', 2);
+      const res4 = reduce(res3, { type: 'INC' });
+      expect(res4.past.toJS(), 'to equal', [1, 2]);
+      const res5 = reduce(res4, { type: 'INC' });
+      expect(res5.past.toJS(), 'to equal', [2, 3]);
+    });
+
     it('should keep track of past states and undo them.', () => {
       const reduce = undoable(lowerReducer);
       const res = reduce(undefined, {}); // init
