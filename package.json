@@ -1,7 +1,7 @@
 {
   "name": "redux-undo-immutable",
   "productName": "Redux Undo Immutable",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Redux Undo with ImmutableJS",
   "main": "lib/index.js",
   "scripts": {
